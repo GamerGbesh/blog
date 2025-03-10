@@ -1,0 +1,32 @@
+.center-box {
+    height: 100vh; /* Full viewport height */
+    display: flex;
+    align-items: center; /* Vertical centering */
+    justify-content: center; /* Horizontal centering */
+}
+
+/* Box styling */
+.content-box {
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    max-width: 500px; /* Adjust width */
+    width: 100%;
+}
+
+body{
+    text-align: center;
+}
+
+input{
+    padding-left: 30%;
+    padding-right: 30%;
+    padding-top: 2%;
+    padding-bottom: 2%;
+    border-width: 2px;
+}
+
+h3 {
+    color: red;
+}

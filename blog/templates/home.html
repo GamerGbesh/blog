@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+    
+    <h1>Welcome to the AI blog generator</h1>
+    <p>To use, paste your youtube link in the box below and watch as your blog is generated.
+    </p>
+
+    <form action="" method="post">
+        {% csrf_token %}
+        <input type="url", name="url", id="url", placeholder="Paste YouTube video link" class="d-flex"></br>
+        {% if blog %}
+        <h6>Title: {{ title }}</h6>
+        <p class="form-control">{{ blog }}</p>
+        {% endif %}
+        <button type="submit", class="btn btn-primary">Generate AI blog</button>
+    </form>
+{% endblock %}

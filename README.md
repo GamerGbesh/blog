@@ -1,0 +1,1 @@
+# This is a sample blog creation site using django and basic html and css
