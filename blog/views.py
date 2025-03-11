@@ -120,6 +120,6 @@ def make_blog(text):
         "content":prompt 
     }
     ])
-    return re.split(r"<think>.+</think>", response["message"]["content"], flags=re.DOTALL)[1]
+    return "".join("".join(re.split(r"<think>.+</think>", response["message"]["content"], flags=re.DOTALL)[1].split("**")).split("###"))
 
     
