@@ -1,27 +1,27 @@
 from django.shortcuts import render, get_object_or_404, redirect, HttpResponse
-from . import forms
 from django.contrib.auth import authenticate, login, logout
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib.auth.decorators import login_required
-from .models import Content
+from pathlib import Path
 import yt_dlp
 import os
-from pathlib import Path
 import whisper
 import ollama
 import re
 
-# Create your views here.
+from . import forms
+from .models import Content
+
 def home(request):
-    blog = ""
-    title = ""
+    blog, title = "", ""
+
     if request.method == "POST":
         url = request.POST.get("url")
         if url:
             title, file = get_audio_title(url)
-            blog = get_transcript(file)
-            blog = make_blog(blog)
-            if request.user != "AnonymousUser":
+            transcript = get_transcript(file)
+            blog = generate_blog(transcript)
+            if request.user.is_authenticated:
                 Content.objects.create(user=request.user, title=title, transcription=blog)
 
     return render(request,"home.html", {"blog": blog, "title": title})
@@ -32,11 +32,11 @@ def login_user(request):
         username = request.POST.get("username")
         password = request.POST.get("password")
         user = authenticate(request, username=username, password=password)
-        if user is not None:
+
+        if user:
             login(request, user)
             return redirect("home")
-        else:
-            return redirect("login")
+        return redirect("login")
     return render(request, "login.html")
 
 def signup(request):
@@ -47,7 +47,6 @@ def signup(request):
         password = form.cleaned_data.get("password1")
         user = authenticate(username=username.lower(), password=password)
         login(request, user)
-        user = request.user
         return redirect("home")
         
     return render(request, "signup.html", {"form": form})
@@ -58,24 +57,22 @@ def logout_user(request):
 
 @login_required
 def transcription(request):
-    transcripts = Content.objects.filter(user=request.user).order_by("created")
+    transcripts = Content.objects.filter(user=request.user).order_by("-created")
     paginator = Paginator(transcripts, 10)
     page_number = request.GET.get("page")
 
     try:
         page_obj = paginator.get_page(page_number)
-    except PageNotAnInteger:
+    except (PageNotAnInteger, EmptyPage):
         page_obj = paginator.page(1)
-    except EmptyPage:
-        page_obj = paginator.page(paginator.num_pages)
+
     return render(request, "transcription.html", {"page_obj": page_obj})
 
 
 @login_required
 def blogs(request, id):
     blog = Content.objects.filter(user=request.user).get(id=id)
-    template = {"memo":blog}
-    return render(request, "blog.html", template)
+    return render(request, "blog.html", {"memo":blog})
 
 
 def get_audio_title(url):
@@ -91,6 +88,7 @@ def get_audio_title(url):
             "preferredquality": "192",
         }]
     }
+
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         info = ydl.extract_info(url, download=True)
     
@@ -106,17 +104,12 @@ def get_transcript(file):
     return result["text"]
     
 
-def make_blog(text):
-
+def generate_blog(text):
     model = "deepseek-r1:latest"
     prompt = f"Make a very informative blog post about the following '{text}'."
 
-    response = ollama.chat(model=model, messages=[
-    {
-        "role":"user",
-        "content":prompt 
-    }
-    ])
-    return "".join("".join(re.split(r"<think>.+</think>", response["message"]["content"], flags=re.DOTALL)[1].split("**")).split("###"))
-
+    response = ollama.chat(model=model, messages=[{"role":"user", "content":prompt}])
+    cleaned_text = re.split(r"<think>.+</think>", response["message"]["content"], flags=re.DOTALL)[1]
+    cleaned_text = cleaned_text.replace("**", "").replace("###", "")
+    return cleaned_text
     
