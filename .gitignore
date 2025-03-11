@@ -6,3 +6,4 @@ Modelfile
 blog/migrations
 blog/__pycache__
 blogger/__pycache__
+db.sqlite3
