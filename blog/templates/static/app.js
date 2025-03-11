@@ -71,10 +71,11 @@ document.addEventListener("DOMContentLoaded", function () {
         loader.classList.add("loading-spinner");
         loader.style.display = "none";
         loader.innerHTML = `
-            <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);">
-                <div class="spinner-border text-primary" role="status">
+            <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1050; background: rgba(255, 255, 255, 0.9); padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.3);">
+                <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
                     <span class="visually-hidden">Loading...</span>
                 </div>
+                <p style="margin-top: 10px; font-weight: bold; color: #007bff;">Generating Blog...</p>
             </div>
         `;
         document.body.appendChild(loader);
