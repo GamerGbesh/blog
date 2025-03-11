@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block title %}{{ memo.title }}{% endblock %}
+
+<body>
+    {% block content %}
+    <h2>{{ memo.title }}</h2>
+    </textarea class="form-control w-100" rows="10" readonly>{{ memo.transcription }}</textarea>
+    {% endblock %}
+</body>

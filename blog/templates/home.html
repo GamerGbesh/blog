@@ -10,8 +10,8 @@
         {% csrf_token %}
         <input type="url", name="url", id="url", placeholder="Paste YouTube video link" class="d-flex"></br>
         {% if blog %}
-        <h6>Title: {{ title }}</h6>
-        <p class="form-control">{{ blog }}</p>
+        <h2>Title: {{ title }}</h2>
+        </textarea class="form-control w-100" rows="10" readonly>{{ blog }}</textarea></br>
         {% endif %}
         <button type="submit", class="btn btn-primary">Generate AI blog</button>
     </form>

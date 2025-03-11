@@ -1,32 +1,113 @@
-.center-box {
-    height: 100vh; /* Full viewport height */
-    display: flex;
-    align-items: center; /* Vertical centering */
-    justify-content: center; /* Horizontal centering */
+/* General Styling */
+body {
+    text-align: center;
+    background-color: #f4f8ff; /* Light blue background */
+    color: #333; /* Dark gray text for readability */
+    font-family: Arial, sans-serif;
 }
 
-/* Box styling */
+.center-box {
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+/* Content Box Styling */
 .content-box {
     background: white;
     padding: 30px;
     border-radius: 10px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    max-width: 500px; /* Adjust width */
+    max-width: 800px;
     width: 100%;
+    overflow-y: auto; /* Allows scrolling without limiting height */
+    border: 2px solid #007bff; /* Blue border */
 }
 
-body{
-    text-align: center;
+/* Form Inputs */
+input, textarea {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid #007bff;
+    border-radius: 5px;
+    font-size: 16px;
+    background-color: white;
+    color: #333;
 }
 
-input{
-    padding-left: 30%;
-    padding-right: 30%;
-    padding-top: 2%;
-    padding-bottom: 2%;
-    border-width: 2px;
+textarea.form-control {
+    max-height: 300px;
+    overflow-y: auto;
+    resize: vertical;
+    text-align: left;
+}
+
+/* Button Styling */
+.btn-primary {
+    background-color: #007bff;
+    border-color: #0056b3;
+    color: white;
+    transition: background-color 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #004494;
+}
+
+/* Header and Text */
+h1, h2 {
+    color: #0056b3; /* Darker blue for contrast */
 }
 
 h3 {
-    color: red;
+    color: #d9534f; /* Bootstrap 'danger' color instead of pure red */
+}
+
+/* Left align all links */
+a {
+    display: block;
+    text-align: left;
+    color: #007bff;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}
+
+/* Pagination Styling */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    gap: 10px;
+}
+
+.pagination a, .pagination strong {
+    padding: 8px 12px;
+    border: 1px solid #007bff;
+    border-radius: 5px;
+    color: #007bff;
+    text-decoration: none;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.pagination a:hover {
+    background-color: #007bff;
+    color: white;
+}
+
+.pagination strong {
+    background-color: #0056b3;
+    color: white;
+}
+
+#sign {
+    text-align: center;
 }

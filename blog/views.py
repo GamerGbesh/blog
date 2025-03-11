@@ -7,7 +7,9 @@ from .models import Content
 import yt_dlp
 import os
 from pathlib import Path
-import speech_recognition as sr
+import whisper
+import ollama
+import re
 
 
 
@@ -17,10 +19,12 @@ def home(request):
     title = ""
     if request.method == "POST":
         url = request.POST.get("url")
-        title, file = get_audio_title(url)
-        blog = get_transcript(file)[0]
-        Content(user=request.user, title=title, transcription=blog)
-        Content.save()
+        if url:
+            title, file = get_audio_title(url)
+            blog = get_transcript(file)
+            blog = make_blog(blog)
+            if request.user != "AnonymousUser":
+                Content.objects.create(user=request.user, title=title, transcription=blog)
 
     return render(request,"home.html", {"blog": blog, "title": title})
 
@@ -38,18 +42,17 @@ def login_user(request):
     return render(request, "login.html")
 
 def signup(request):
-    if request.method == "POST":
-        form = forms.CustomUser(request.POST)
-        if form.is_valid():
-            form.save()
-            username = form.cleaned_data.get("username").lower()
-            password = form.cleaned_data.get("password1")
-            user = authenticate(username=username.lower(), password=password)
-            login(request, user)
-            user = request.user
-            return redirect("home")
+    form = forms.CustomUser(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        username = form.cleaned_data.get("username").lower()
+        password = form.cleaned_data.get("password1")
+        user = authenticate(username=username.lower(), password=password)
+        login(request, user)
+        user = request.user
+        return redirect("home")
         
-    return render(request, "signup.html", {"form": forms.CustomUser})
+    return render(request, "signup.html", {"form": form})
 
 def logout_user(request):
     logout(request)
@@ -57,7 +60,7 @@ def logout_user(request):
 
 @login_required
 def transcription(request):
-    transcripts = Content.objects.filter(user=request.user)
+    transcripts = Content.objects.filter(user=request.user).order_by("created")
     paginator = Paginator(transcripts, 10)
     page_number = request.GET.get("page")
 
@@ -70,11 +73,17 @@ def transcription(request):
     return render(request, "transcription.html", {"page_obj": page_obj})
 
 
+@login_required
+def blogs(request, id):
+    blog = Content.objects.filter(user=request.user).get(id=id)
+    template = {"memo":blog}
+    return render(request, "blog.html", template)
+
+
 def get_audio_title(url):
     base_dir = Path(os.getcwd())
     download_folder = base_dir / "audios"
-    if not download_folder.exists():
-        download_folder.mkdir()
+    download_folder.mkdir(exist_ok=True)
     ydl_opts = {
         "format":"bestaudio/best",
         "outtmpl":f"{download_folder}/output.%(ext)s",
@@ -85,26 +94,32 @@ def get_audio_title(url):
         }]
     }
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        info = ydl.extract_info(url, download=False)
-        ydl.download([url])
+        info = ydl.extract_info(url, download=True)
+        # ydl.download([url])
     
-    title = info["title"]
+    title = info.get("title", "Unknown Title")
     file = download_folder / "output.wav"
     return title, file
 
 
 def get_transcript(file):
-    from key import CLIENT_KEY, CLIENT_ID
-    gone = file
-    file = str(file)
-    r = sr.Recognizer()
-    with sr.AudioFile(file) as src:
-        audio_data = r.record(src)
-        text = r.recognize_houndify(audio_data, CLIENT_ID, CLIENT_KEY)
-    os.remove(gone)
-    return text
+    model = whisper.load_model("small")
+    result = model.transcribe(str(file), verbose=True)
+    os.remove(file)
+    return result["text"]
     
 
 def make_blog(text):
-    pass
+
+    model = "deepseek-r1:latest"
+    prompt = f"Make a very informative blog post about the following '{text}'."
+
+    response = ollama.chat(model=model, messages=[
+    {
+        "role":"user",
+        "content":prompt 
+    }
+    ])
+    return re.split(r"<think>.+</think>", response["message"]["content"], flags=re.DOTALL)[1]
+
     

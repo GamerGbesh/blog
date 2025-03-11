@@ -2,3 +2,7 @@ audios
 api.txt
 tespy.py
 blog/key.py
+Modelfile
+blog/migrations
+blog/__pycache__
+blogger/__pycache__
