@@ -11,8 +11,6 @@ import whisper
 import ollama
 import re
 
-
-
 # Create your views here.
 def home(request):
     blog = ""
@@ -95,7 +93,6 @@ def get_audio_title(url):
     }
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         info = ydl.extract_info(url, download=True)
-        # ydl.download([url])
     
     title = info.get("title", "Unknown Title")
     file = download_folder / "output.wav"
